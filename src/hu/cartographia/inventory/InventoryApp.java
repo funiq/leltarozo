@@ -100,7 +100,8 @@ public class InventoryApp extends Application {
 		}
 		
 		try {
-			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(locationsFileName), "UTF-8"));
+			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(basePath + locationsFileName), "UTF-8"));
+			System.out.println( basePath + locationsFileName);
 			String line;
 			while ((line = in.readLine()) != null) {
 				locationChoices.add(line.trim());
