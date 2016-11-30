@@ -78,8 +78,8 @@ public class Logger {
 		LogEntry lastLogEntry = logEntries.size() > 0 ? logEntries.get(0) : null;
 
 		if (input.matches("[-ö_\\d]+")) {	// Barcode
-			input = input.replace("ö", "0").replace("-", "");
-			if (input.length() >= 8) {
+			String barcode = input.replace("ö", "0").replace("-", "");
+			if (barcode.length() >= 8) {
 				// New barcode has been entered, flush the previous one
 				writeToLog();
 
@@ -87,7 +87,7 @@ public class Logger {
 				if (dbEntry != null) {
 					lastLogEntry = new LogEntry(dbEntry.getBarcode(), dbEntry);
 				} else {
-					lastLogEntry = new LogEntry(input, null);
+					lastLogEntry = new LogEntry(barcode, null);
 				}
 				logEntries.add(0, lastLogEntry);
 			} else if (lastLogEntry != null) {
