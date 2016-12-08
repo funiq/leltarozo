@@ -36,7 +36,6 @@ class DatabaseEntry {
         this.originalBarcode = barcode;
         if (barcode.matches(".*-[0-9]{2}$") || barcode.matches(".*-[0-9]{5}$")) {
         	this.normalizedBarcode = barcode.replaceAll("-[0-9]+", "").replaceAll("[^0-9]", "");
-        	//System.out.println(normalizedBarcode);
         } else {
 	        this.normalizedBarcode = barcode.replaceAll("[^0-9]", "");
         }
@@ -73,12 +72,11 @@ class DatabaseEntry {
  * @since 2016-11-14
  */
 class Database implements Iterable<Map.Entry<String, List<DatabaseEntry>>> {
-	//private final Map<String, DatabaseEntry> items = new HashMap<String, DatabaseEntry>();
-	private final Map<String, List<DatabaseEntry>> items = new HashMap<String, List<DatabaseEntry>>();
+	private final Map<String, List<DatabaseEntry>> entries = new HashMap<String, List<DatabaseEntry>>();
 
 	@Override
 	public Iterator<Map.Entry<String, List<DatabaseEntry>>> iterator() {
-		return items.entrySet().iterator();
+		return entries.entrySet().iterator();
 	}
 
 	/**
@@ -87,7 +85,20 @@ class Database implements Iterable<Map.Entry<String, List<DatabaseEntry>>> {
 	 * @return A database entry or null
 	 */
 	public List<DatabaseEntry> getByBarcode(String barcode) {
-		return items.get(barcode);
+		return entries.get(barcode);
+	}
+	
+	/**
+	 * Generates a list of database entry values
+	 * @return The list of database entries
+	 */
+	public List<DatabaseEntry> getList() {
+		List<DatabaseEntry> items = new ArrayList<DatabaseEntry>();
+		
+		for (List<DatabaseEntry> entry : entries.values()) {
+			items.addAll(entry);
+		}
+		return items;
 	}
 
 	/**
@@ -98,7 +109,7 @@ class Database implements Iterable<Map.Entry<String, List<DatabaseEntry>>> {
 		if (getByBarcode(item.getNormalizedBarcode()) == null) {
 			List<DatabaseEntry> newEntry = new ArrayList<DatabaseEntry>();
 			newEntry.add(item);
-			items.put(item.getNormalizedBarcode(), newEntry);
+			entries.put(item.getNormalizedBarcode(), newEntry);
 		} else {
 			getByBarcode(item.getNormalizedBarcode()).add(item);
 		}
@@ -128,7 +139,7 @@ class Database implements Iterable<Map.Entry<String, List<DatabaseEntry>>> {
 	}
 
 	/**
-	 * Parses the given CSV file, creates DatabaseEntry-es and adds them to items
+	 * Parses the given CSV file, creates DatabaseEntry-es and adds them to entries
 	 * Can read every CSV format: comma, semicolon or tab separated; quoted or unqouted values
 	 *
 	 * The file should be UTF-8 encoded. Each line shuld contain the following field in this order:
@@ -182,32 +193,11 @@ class Database implements Iterable<Map.Entry<String, List<DatabaseEntry>>> {
 						addItem(barcode, list.get(1), list.get(2), "", "");
 					}
 				}
-    			//System.out.println(list);
 			}
 				
-			if (items.size() == 0) {
+			if (entries.size() == 0) {
 				throw new Exception("\"" + csvFile + "\" adatbázisfájl nem taratalmazott érvényes bejegyzést.");
 			}
-			
-			/*
-			List<String> duplications = new ArrayList<String>();
-			for (Map.Entry<String,DatabaseEntry> entry : this) {
-				if (!entry.getValue().getBarcode().matches("[\\d]+") && getByBarcode(entry.getValue().getBarcode().replaceAll("[^\\d]", "")) != null) {
-					duplications.add(entry.getValue().getBarcode().replaceAll("[^\\d]", ""));
-					//System.err.println(entry.getValue().getBarcode() + " már létezik " + entry.getValue().getBarcode().replaceAll("[^\\d]", "") + " néven");
-				}
-			}
-			duplications.removeIf(Objects::isNull);
-			if (duplications.size() > 0) {
-				System.err.println("Az alábbi " + duplications.size() + " vonalkód többször is előfordul különböző toldalékokkal. Átnevezve '#' végződésűre.\n" + duplications);
-				for (String duplication : duplications) {
-					final DatabaseEntry old = items.remove(duplication);
-					if (old != null) {
-						items.put(duplication + "#", new DatabaseEntry(old.getName(), old.getPublisher(), old.getStockCount(), old.getId(), old.getBarcode() + "#1"));
-					}
-				}
-			}
-			*/
 			
 			scanner.close();
 		} catch (IOException e) {

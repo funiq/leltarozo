@@ -27,6 +27,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.stage.Stage;
 import javafx.stage.Modality;
 import javafx.scene.image.Image;
@@ -101,7 +102,6 @@ public class InventoryApp extends Application {
 		
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(basePath + locationsFileName), "UTF-8"));
-			System.out.println( basePath + locationsFileName);
 			String line;
 			while ((line = in.readLine()) != null) {
 				locationChoices.add(line.trim());
@@ -188,8 +188,10 @@ public class InventoryApp extends Application {
 		tooltipLabel.setMaxHeight(Double.MAX_VALUE);
 		tooltipLabel.setAlignment(Pos.CENTER_RIGHT);
 		tooltipLabel.setId("tooltipLabel");
+		
+		AutoCompleteTextField inputField = new AutoCompleteTextField();
+		inputField.getEntries().addAll(db.getList());
 
-		TextField inputField = new TextField();
 		inputField.setId("inputField");
 		inputField.setMaxWidth(Double.MAX_VALUE);
 		HBox.setHgrow(inputField, Priority.ALWAYS);
@@ -656,4 +658,5 @@ public class InventoryApp extends Application {
 		}
 		return checkDigit != null ? checkDigit == code.charAt(code.length()-1)-'0' : false;
 	}
+
 }

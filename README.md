@@ -12,15 +12,17 @@ Ez a program szabad szoftver; terjeszthető illetve módosítható a Free Softwa
 Használat
 ------------
 
-A program grafikus felülete egy bevieli mezőből és egy a beolvasott termékeket listázó táblázatból áll. A beviteli mező univerzális, minden adat itt adható meg.
+A program grafikus felülete egy beviteli mezőből és egy a beolvasott termékeket listázó táblázatból áll. A beviteli mező univerzális, minden adat itt adható meg.
 
 Egy vonalkód beolvasása (vagy kézi beírása) után a termék és adatai megjelennek a listában. A beviteli mezőbe számot írva módosítható a leltározott darabszám (alapérték 1), a kiadási év, vagy szöveget írva megjegyzés fűzhető hozzá. A program a beírt karakterek alapján dönti el, melyik műveletet kell alkalmazni. Újabb vonalkód beolvasásakor a legutóbbi sor kiíródik a naplófájlba, innentől nem módosítható.
 
 ### Egyéb tudnivalók
 * Vonalkódokból a legalább 8, legfeljebb 14 számból állókat tudja kezelni. Ismeri az EAN, ISBN és GTIN szabványokat.
-* A adatbázisfájlban egy vonalkód többszö is szerepelhet (pl speciális csomagolású termékek). Ilyen terméket beolvasva a program egy választóablakot jelenít meg (és figyelmeztető hangot ad)
+* A adatbázisfájlban egy vonalkód többször is szerepelhet (pl. speciális csomagolású termékek). Ilyen terméket beolvasva a program egy választóablakot jelenít meg (és figyelmeztető hangot ad)
+* Minden ki és bemeneti fájl UTF8 kódolású
 * Az adatbázisban nem szereplő termékek piros színnel jelennek meg a listában (és a program figyelmeztető hangot ad)
-* A bejelentkezőképernyőn található *Kimutatás készítésére* kattintva összefűzi a *log* könyvtár naplófájljait, valamint összesített kimutatást készít a leltározott termékekről (összeadja a darabszámokat és összehasonlítja a készlet szerintivel).
+* A beviteli mezőben a termékek név szerint is kereshetőek. A találatok a egy legördülőlistában jelennek meg, egy találatra rákattintva az rögtön bekerül a táblázatba.
+* A bejelentkező képernyőn található *Kimutatás készítésére* kattintva összefűzi a *log* könyvtár naplófájljait, valamint összesített kimutatást készít a leltározott termékekről (összeadja a darabszámokat és összehasonlítja a készlet szerintivel)
 
 ### Kimenet
 A naplófájlok a .jar fájllal megegyező könyvtárban lévő *log* könyvtárban jönnek létre az alábbi séma szerint:
@@ -33,7 +35,7 @@ Rendszerkövetelmények
 
 A program futtatásához Java 8 szükséges JavaFX támogatással. Windowson a JRE 8 alapértelmezetten tartalmazza a JavaFX könyvtárat. Linuxon külön kell telepíteni az `openjdk` csomagot.
 
-A használathoz erősen ajánlott egy kézi vonalkódolvasó ami képes USB billenytűzetként üzemelni (a legtöbb készülék ezt támogatja).
+A használathoz erősen ajánlott egy kézi vonalkódolvasó ami képes USB billentyűzetként üzemelni (a legtöbb készülék ezt támogatja).
 
 Telepítés, futtatás
 ------------
@@ -68,5 +70,5 @@ cd leltarozo
 ant
 ```
 
-Megjegyzés: A program elég sok, a saját leltározásunkhoz igazított megoldást tartalmaz. Ha szeretnél egy testreszabott leltározó programot, de nem értesz a programozáshoz, vedd fel a kapcsolatot fejlesztőinkkel: info@cartographia.hu
+Megjegyzés: A program elég sok, a saját leltározásunkhoz igazított megoldást tartalmaz. Ha szeretnél egy testre szabott leltározó programot, de nem értesz a programozáshoz, vedd fel a kapcsolatot fejlesztőinkkel: info@cartographia.hu
 
