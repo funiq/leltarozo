@@ -27,7 +27,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import com.sun.javafx.scene.control.skin.ComboBoxListViewSkin;
 import javafx.stage.Stage;
 import javafx.stage.Modality;
 import javafx.scene.image.Image;
