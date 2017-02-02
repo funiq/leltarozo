@@ -16,28 +16,57 @@
     <target name="clean">
         <delete dir="${build.dir}"/>
     </target>
+    
+    <target name="get-time">
+        <tstamp>
+            <format property="buildTime" pattern="HH:mm:ss" locale="en,UK"/>
+            <format property="buildDate" pattern="yyyy-MM-dd" locale="en,UK"/>
+        </tstamp>
+    </target>
 
-    <target name="compile">
+    <!-- Compile sources -->
+    <target name="compile" depends="get-time">
         <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+        <!-- Duplicate source files to the build directory -->
+        <copy todir="${build.dir}/src">
+            <fileset dir="${src.dir}" />
+        </copy>
+        <!-- Replace magic words in duplicated source files -->
+        <replace dir="${build.dir}/src">
+             <replacefilter token="@buildDate@" value="${buildDate}"/>
+             <replacefilter token="@buildTime@" value="${buildTime}"/>
+        </replace>
+        
+        <!-- Compile sources -->
+        <javac srcdir="${build.dir}/src" destdir="${classes.dir}" classpathref="classpath"/>
+
+        <!-- Copy "resources" folder next to the classes-->
         <copy todir="${classes.dir}">
             <fileset dir="${src.dir}" excludes="**/*.java"/>
         </copy>
+        
+        <!-- Copy external resources (database and location list files) next to the jar file -->
         <copy todir="${jar.dir}">
             <fileset dir="." includes="database.csv locations.txt"/>
         </copy>
     </target>
 
+    <!-- Create jar file -->
     <target name="jar" depends="compile">
         <mkdir dir="${jar.dir}"/>
         <jar destfile="${jar.dir}/${ant.project.name}.jar" basedir="${classes.dir}">
+            <!-- Generate the MANIFEST.MF file -->
             <manifest>
                 <attribute name="Main-Class" value="${main-class}"/>
             </manifest>
+            <!-- Include source files to the jar -->
+            <zipfileset dir="${src.dir}" prefix="source" includes="**/*.java"/>
         </jar>
+        <!-- Make jar runnable -->
         <chmod file="${jar.dir}/${ant.project.name}.jar" perm="u+x"/>
     </target>
 
+    <!-- Run the jar file -->
     <target name="run" depends="jar">
         <java fork="true" classname="${main-class}">
             <classpath>

@@ -103,7 +103,9 @@ public class InventoryApp extends Application {
 			BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(basePath + locationsFileName), "UTF-8"));
 			String line;
 			while ((line = in.readLine()) != null) {
-				locationChoices.add(line.trim());
+				if (!line.trim().isEmpty()) {
+					locationChoices.add(line.trim());
+				}
 			}
 			in.close();
 		} catch (IOException e) {}
@@ -361,6 +363,11 @@ public class InventoryApp extends Application {
 		primaryStage.setScene(scene);
 	}
 	
+	/**
+	 * Shows a dialog with a list of the given choices
+	 * where the user can select an item
+	 * Automatically adds a "Non of them" item to the list
+	 */
 	private DatabaseEntry chooseDbEntry(List<DatabaseEntry> dbEntries) {
 		
 		alertSound1.play();
@@ -430,12 +437,6 @@ public class InventoryApp extends Application {
 		grid.setHgap(15);
 		grid.setVgap(15);
 		grid.setPadding(new Insets(25, 25, 25, 25));
-		
-		final Text actiontarget = new Text();
-		grid.add(actiontarget, 1, 6);
-
-		Scene scene = new Scene(grid, 300, 275);
-		//scene.getStylesheets().add("leltarozo/resources/style.css");
 
 		final Text scenetitle = new Text("Bejelentkezés");
 		scenetitle.setFont(Font.font("Arial", FontWeight.NORMAL, 20));
@@ -475,42 +476,59 @@ public class InventoryApp extends Application {
 		hbBtn.getChildren().add(nextButton);
 		grid.add(hbBtn, 1, 4);
 
-		final Button createPivotButton = new Button("Kimutatás készítése");
-		createPivotButton.setOnAction(new EventHandler<ActionEvent>() {
+		final Button createReportButton = new Button("Kimutatás készítése");
+		createReportButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent e) {
-				pivotCreator();
+				reportCreator();
 			}
 		});
-		grid.add(createPivotButton, 0, 4);
+		grid.add(createReportButton, 0, 4);
+		
+		BorderPane pane = new BorderPane();
+		pane.setPadding(new Insets(10));
+		pane.setCenter(grid);
+		
+		final Text actiontarget = new Text("Verzió: @buildDate@, @buildTime@");
+		pane.setBottom(actiontarget);
 
+
+		Scene scene = new Scene(pane);
+		//scene.getStylesheets().add("leltarozo/resources/style.css");
 		primaryStage.setScene(scene);
 	}
 
 	/**
-	 * Process log files and creates a summary and a pivot table output
+	 * Process log files and creates a summary and a report table output
 	 */
-	private void pivotCreator() {
+	private void reportCreator() {
 		final String startTimeString = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 		final String concatFileName = startTimeString + "_leltár_részletes_adatok.csv";
-		final String pivotFileName = startTimeString + "_leltár_eredmény.csv";
+		final String reportFileName = startTimeString + "_leltár_eredmény.csv";
 		final File logDir = new File(basePath + "log");
-		final File pivotDir = new File(basePath + "kimutatások");
+		final File reportDir = new File(basePath + "kimutatások");
 		BufferedWriter mergeWriter = null;
-		BufferedWriter pivotWriter = null;
+		BufferedWriter reportWriter = null;
 		
 		Map<String, LogEntry> logItems = new HashMap<String, LogEntry>();
-		final Date fakeDate = new Date();
+		
+		/* prepare logItems by adding each database entry with null count */
+		for (DatabaseEntry dbEntry : db.getList()) {
+			logItems.put(dbEntry.getBarcode(), new LogEntry(dbEntry.getBarcode(), 0, null, null, dbEntry));
+		}
+		
 		try {
 			if (!logDir.exists()) {
 				return;
 			}
-			if (!pivotDir.exists()) {
-				pivotDir.mkdir();
+			if (!reportDir.exists()) {
+				reportDir.mkdir();
 			}
 			File[] filesList = logDir.listFiles();
 			Arrays.sort(filesList);
-			mergeWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pivotDir.toString() + File.separator + concatFileName),"UTF-8"));
+			
+			/* Merge log files */
+			mergeWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(reportDir.toString() + File.separator + concatFileName),"UTF-8"));
 		
 			for(File file : filesList) {
 				if (file.isFile() && file.toString().toLowerCase().endsWith(".csv")) {
@@ -558,15 +576,15 @@ public class InventoryApp extends Application {
 			alert.setHeaderText("A log mappa naplófájljai sikeresen össze lettek fűzve az alábbi fájlba: " + concatFileName);
 			alert.showAndWait();
 			
-			
-			pivotWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pivotDir.toString() + File.separator + pivotFileName),"UTF-8"));
-			pivotWriter.write("\"Cikkszám\"\t\"Vonalkód\"\t\"Norm. vonalkód\"\t\"Cikknév\"\t\"Kiadó\"\t\"Készlet sz. m.\"\t\"Talált db\"\t\"Eltérés\"");
-			pivotWriter.newLine();
+			/* Create report (compare the summarized result) */
+			reportWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(reportDir.toString() + File.separator + reportFileName),"UTF-8"));
+			reportWriter.write("\"Cikkszám\"\t\"Vonalkód\"\t\"Norm. vonalkód\"\t\"Terméknév\"\t\"Kiadó\"\t\"Készlet sz. m.\"\t\"Talált db\"\t\"Eltérés\"");
+			reportWriter.newLine();
 			for (Map.Entry<String, LogEntry> entry : logItems.entrySet()) {
 				final LogEntry item = entry.getValue();
 				final Integer stockCount = item.getStockCount() != null ? item.getStockCount() : 0;
 
-				pivotWriter.write(String.format("\"%1$s\"\t\"%2$s\"\t\"%3$s\"\t\"%4$s\"\t\"%5$s\"\t%6$d\t%7$d\t%8$s",
+				reportWriter.write(String.format("\"%1$s\"\t\"%2$s\"\t\"%3$s\"\t\"%4$s\"\t\"%5$s\"\t%6$d\t%7$d\t%8$s",
 						item.getProductId(),
 						item.getBarcode(),
 						item.getNormalizedBarcode(),
@@ -576,13 +594,13 @@ public class InventoryApp extends Application {
 						item.getCount(),
 						stockCount != item.getCount() ? "ELTÉR" : "OK"
 				));
-				pivotWriter.newLine();
+				reportWriter.newLine();
 			}
-			pivotWriter.flush();
+			reportWriter.flush();
 			
 			alert = new Alert(AlertType.INFORMATION);
 			alert.setTitle("Kimutatás elkészült");
-			alert.setHeaderText("A log mappa naplófájljaiból elkészült a kimutatás: " + pivotFileName);
+			alert.setHeaderText("A log mappa naplófájljaiból elkészült a kimutatás: " + reportFileName);
 			alert.showAndWait();
 		} catch (Exception e) {
 			System.err.println("Kimutatások készítése sikertelen: " + e.getMessage());
@@ -596,8 +614,8 @@ public class InventoryApp extends Application {
 				if (mergeWriter != null) {
 					mergeWriter.close();
 				}
-				if (pivotWriter != null) {
-					pivotWriter.close();
+				if (reportWriter != null) {
+					reportWriter.close();
 				}
 			} catch (IOException e) {}
 		}

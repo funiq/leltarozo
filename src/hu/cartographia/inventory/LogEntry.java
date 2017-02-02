@@ -33,7 +33,7 @@ public class LogEntry {
         this.count = new SimpleIntegerProperty(count);
         this.publicationDate = new SimpleStringProperty(publicationDate);
         this.comment = new SimpleStringProperty(comment);
-		this.data = dbEntry;
+        this.data = dbEntry;
     }
 
     public LogEntry(String barcode, DatabaseEntry dbEntry) {

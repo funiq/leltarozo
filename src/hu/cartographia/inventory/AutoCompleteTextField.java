@@ -95,7 +95,9 @@ public class AutoCompleteTextField extends TextField {
 		for (int i = 0; i < count; i++) {
 			final DatabaseEntry result = searchResult.get(i);
 			Label entryLabel = new Label(
-				result.getName() + (!result.getId().isEmpty() ? " (" + result.getId() + ")" : "")
+				result.getName()
+					 + (!result.getPublisher().isEmpty() ? "\t(" + result.getPublisher() + ")" : "")
+					 + (!result.getId().isEmpty() ? "\t(" + result.getId() + ")" : "")
 			);
 			CustomMenuItem item = new CustomMenuItem(entryLabel, true);
 			item.setOnAction(new EventHandler<ActionEvent>() {
