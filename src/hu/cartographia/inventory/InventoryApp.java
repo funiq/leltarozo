@@ -514,7 +514,7 @@ public class InventoryApp extends Application {
 		
 		/* prepare logItems by adding each database entry with null count */
 		for (DatabaseEntry dbEntry : db.getList()) {
-			logItems.put(dbEntry.getBarcode(), new LogEntry(dbEntry.getBarcode(), 0, null, null, dbEntry));
+			logItems.put(dbEntry.getBarcode()+ "#" + dbEntry.getId(), new LogEntry(dbEntry.getBarcode(), 0, null, null, dbEntry));
 		}
 		
 		try {
@@ -542,13 +542,14 @@ public class InventoryApp extends Application {
 						if (!line.trim().isEmpty()) {
 							String[] values = new String[12];
 							String[] lineArray = line.trim()
-									.replace("\"\"", "۝")	// change excaped double quotes to a special character
+									.replace("\"\"", "۝")	// change escaped double quotes to a special character
 									.replace("\"", "")		// remove double quotes
 									.replace("۝", "\"")		// replace special character with one double quote character
 									.split("\t");			// split by tab characters
 							System.arraycopy(lineArray, 0, values, 0, lineArray.length);
-							if (logItems.containsKey(values[1])) {
-								logItems.get(values[1]).setCount(logItems.get(values[1]).getCount() + Integer.parseInt(values[2]));
+							String logKey = values[1] + "#" + values[7];
+							if (logItems.containsKey(logKey)) {
+								logItems.get(logKey).setCount(logItems.get(logKey).getCount() + Integer.parseInt(values[2]));
 							} else {
 								DatabaseEntry dbEntry = null;
 								if (db.getByBarcode(values[1]) != null) {
@@ -559,7 +560,7 @@ public class InventoryApp extends Application {
 									}
 								}
 								
-								logItems.put(values[1], new LogEntry(
+								logItems.put(logKey, new LogEntry(
 									values[1], Integer.parseInt(values[2]), values[3], values[4], dbEntry
 								));
 							}
