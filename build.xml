@@ -38,7 +38,7 @@
         </replace>
         
         <!-- Compile sources -->
-        <javac srcdir="${build.dir}/src" destdir="${classes.dir}" classpathref="classpath"/>
+        <javac srcdir="${build.dir}/src" destdir="${classes.dir}" classpathref="classpath" includeantruntime="false"/>
 
         <!-- Copy "resources" folder next to the classes-->
         <copy todir="${classes.dir}">
